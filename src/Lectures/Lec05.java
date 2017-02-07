@@ -1,3 +1,4 @@
+package Lectures;
 
 public class Lec05 {
 

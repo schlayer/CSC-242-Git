@@ -3,7 +3,7 @@ package TicTacToe;
 public class Square {
 	public final int BLANK = 0;
 	public final int X = 1;
-	public final int O = 2;
+	public final int O = -1;
 	
 	private int position = 0;
 	private int state = BLANK;
@@ -27,5 +27,22 @@ public class Square {
 	
 	public int getState() {
 		return state;
+	}
+	
+	public int getPosition() {
+		return position;
+	}
+
+	public String print() { // for printing the board
+		switch (state) {
+		case BLANK:
+			return " ";
+		case X:
+			return "X";
+		case O:
+			return "O";
+		}
+		
+		return " ";
 	}
 }
