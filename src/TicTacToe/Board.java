@@ -4,8 +4,12 @@ public class Board {
 	public final int BLANK = 0;
 	public final int X = 1;
 	public final int O = -1;
-	public int movesMade = 0;
+	private int movesMade = 0;
 	
+	public int getMovesMade() {
+		return movesMade;
+	}
+
 	private int[] played = new int[9];
 	private Square[] squares = new Square[9];
 	
@@ -36,7 +40,7 @@ public class Board {
 		assert (player == X || player == O);
 		
 		int index = position-1;
-		System.out.println("INDEX: " + index);
+		//System.out.println("INDEX: " + index);
 		Square sq = squares[index];
 		if (sq.getState() != BLANK) {
 			System.out.println("That square is occupied!");
@@ -72,11 +76,11 @@ public class Board {
 		
 		if (player == X) {
 			sq.playX();
-			System.out.println("X in square " + position);
+			//System.out.println("X in square " + position);
 		}
 		if (player == O) {
 			sq.playO();
-			System.out.println("O in square " + position);
+			//System.out.println("O in square " + position);
 		}
 		
 		movesMade ++;
@@ -149,31 +153,113 @@ public class Board {
 	}
 	
 	public int whoWon() { // Returns O if O won, X if X won, or BLANK is nobody has won
+        // All sets of three: ROWS 0,1,2; 3,4,5; 6,7,8; COLUMNS 0,3,6; 1,4,7; 2,5,8; DIAGONALS 0,4,8; 2,4,6
+        // Adding the lines of three will give 3 if X wins, -3 if O wins
+       
+        int[] T = getAllStates();
+        int center = T[4];
+       
+        if (center != BLANK) { // Check diagonals
+            if (center + T[0] + T[8] == 3)      { return X; }   // NW to SE
+            if (center + T[0] + T[8] == -3)     { return O; }
+            if (center + T[2] + T[6] == 3)      { return X; }   // NE to SW
+            if (center + T[2] + T[6] == -3)     { return O; }
+        }
+       
+        for (int s = 0; s <= 6; s += 3) {
+            if (T[s] + T[s+1] + T[s+2] == 3)    { return X; }   // Horizontal
+            if (T[s] + T[s+1] + T[s+2] == -3)   { return O; }
+        }
+       
+        for (int s = 0; s <= 2; s ++) {
+            if (T[s] + T[s+3] + T[s+6] == 3)    { return X; }   // Vertical
+            if (T[s] + T[s+3] + T[s+6] == -3)   { return O; }
+        }
+       
+        System.out.println("Nobody has won yet...");
+        return BLANK;
+    }
+	
+	public int numTwos(int player) { // Returns the number of twos on the board for the given player
 		// All sets of three: ROWS 0,1,2; 3,4,5; 6,7,8; COLUMNS 0,3,6; 1,4,7; 2,5,8; DIAGONALS 0,4,8; 2,4,6
-		// Adding the lines of three will give 3 if X wins, -3 if O wins
-		
+		// Adding the lines of three will give 2 if X has two, -2 if O has two
+		assert (player == X || player == O);
+		if (movesMade < 3) { return 0; } // No twos can exist unless 3 moves were made.
+
+		int twos = 0;
+		int want = 2*player; // -2 for O, 2 for X
+
 		int[] T = getAllStates();
-		int center = T[4];
-		
-		if (center != BLANK) { // Check diagonals
-			if (center + T[0] + T[8] == 3) 		{ return X; } 	// NW to SE
-			if (center + T[0] + T[8] == -3) 	{ return O; }
-			if (center + T[2] + T[6] == 3) 		{ return X; } 	// NE to SW
-			if (center + T[2] + T[6] == -3) 	{ return O; }
-		}
-		
+
+		// Check diagonals
+		if (T[4] + T[0] + T[8] == want)     { twos ++; }    // NW to SE
+		if (T[4] + T[2] + T[6] == want)     { twos ++; }    // NE to SW
+
 		for (int s = 0; s <= 6; s += 3) {
-			if (T[s] + T[s+1] + T[s+2] == 3) 	{ return X; } 	// Horizontal
-			if (T[s] + T[s+1] + T[s+2] == -3) 	{ return O; }
+			if (T[s] + T[s+1] + T[s+2] == want)     { twos ++; }    // Horizontal
 		}
-		
+
 		for (int s = 0; s <= 2; s ++) {
-			if (T[s] + T[s+3] + T[s+6] == 3) 	{ return X; } 	// Vertical
-			if (T[s] + T[s+3] + T[s+6] == -3) 	{ return O; }
+			if (T[s] + T[s+3] + T[s+6] == want)     { twos ++; }    // Vertical
 		}
-		
-		//System.out.println("Nobody has won yet...");
-		return BLANK;
+
+		String pstr = (player == X) ? "X" : "O";
+		System.out.println(pstr + " has " + twos + " twos.");
+		return twos;
+	}
+
+	public int whereToBlock(int opponent) { // Returns 0 if enemy has no twos, or a position to block them.
+		// All sets of three: ROWS 0,1,2; 3,4,5; 6,7,8; COLUMNS 0,3,6; 1,4,7; 2,5,8; DIAGONALS 0,4,8; 2,4,6
+		// Adding the lines of three will give 2 if X has two, -2 if O has two
+		assert (opponent == X || opponent == O);
+		if (movesMade < 3) { return 0; } // No twos can exist unless 3 moves were made.
+
+		int enemyTwos = 0;
+		int want = 2*opponent; // 2 for O, -2 for X
+		int blockPos = 0;
+
+		int[] T = getAllStates();
+
+		// Check diagonals
+		if (T[0] + T[4] + T[8] == want) { // NW to SE
+			enemyTwos ++;
+			for (int k = 0; k <= 8; k += 4) { // find the blank, set blockPos to that position
+				if (T[k] == BLANK) { blockPos = k+1; break; }
+			}
+		}  
+		if (T[2] + T[4] + T[6] == want) { // NE to SW
+			enemyTwos ++;
+			for (int k = 0; k <= 6; k += 2) { // find the blank, set blockPos to that position
+				if (T[k] == BLANK) { blockPos = k+1; break; }
+			}
+		}  
+
+		for (int s = 0; s <= 6; s += 3) { // Horizontal
+			if (T[s] + T[s+1] + T[s+2] == want) {
+				enemyTwos ++;
+				for (int k = s; k <= s+2; k += 1) { // find the blank, set blockPos to that position
+					if (T[k] == BLANK) { blockPos = k+1; break; }
+				}
+			}  
+		}
+
+		for (int s = 0; s <= 2; s ++) { // Vertical
+			if (T[s] + T[s+3] + T[s+6] == want) {
+				enemyTwos ++;
+				for (int k = s; k <= s+6; k += 3) { // find the blank, set blockPos to that position
+					if (T[k] == BLANK) { blockPos = k+1; break; }
+				}
+			}  
+		}
+
+		String pstr = (opponent == X) ? "X" : "O";
+		System.out.println(pstr + " has " + enemyTwos + " twos.");
+		if (enemyTwos < 1) { return 0; }
+		else {
+			System.out.println("Must block at position " + blockPos + "!");
+		}
+
+		return blockPos;
 	}
 	
 	
