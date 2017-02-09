@@ -181,8 +181,14 @@ public class NineBoardAI{
 			String pstr = (p == X) ? "X" : "O";
 			System.out.println(pstr + "'s turn, playing in board " + nextBoard);
 			System.out.println("Pick a spot to move. (1-9): ");
-			//int s = sc.nextInt();
-			int s = Minimax(b, p, curTurn);
+			int s = 1;
+			if (p == O) {
+				s = Minimax(b, p, curTurn);
+			}
+			else {
+				System.out.println("Enter a move");
+				s = sc.nextInt();
+			}
 			
 			try {
 				//int p = (int) (Math.pow(-1, turn)); // track whose turn it is. 1 for X, -1 for O.

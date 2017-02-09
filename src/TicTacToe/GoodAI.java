@@ -134,10 +134,16 @@ public class GoodAI {
 			int movePos = actions[a];
 
 			
+			
 			first = true;
 
 			//b.showBoard();
-			movePos = Minimax(b, player);
+			if (player == O) {
+				movePos = Minimax(b, player);
+			} else {
+				System.out.println("Enter a position (1-9)");
+				movePos = sc.nextInt();
+			}
 			System.out.println("Minimax eval...");
 			b.showBoard();
 			System.out.println("Minimax chose: " + movePos);
@@ -157,13 +163,13 @@ public class GoodAI {
 				
 				break;
 			}
-			if (turn == 8) {
+			if (turn == 9) {
 				System.out.println("It's a draw!");
 			}
 			
 			// wait
-			System.out.println("Waiting for a signal...");
-			String go = sc.next();
+			//System.out.println("Waiting for a signal...");
+			//String go = sc.next();
 		}
 		
 		b.showBoard();
