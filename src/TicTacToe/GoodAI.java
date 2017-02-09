@@ -3,7 +3,7 @@ package TicTacToe;
 import java.util.Random;
 import java.util.Scanner;
 
-public class ReallySimpleAI {
+public class GoodAI {
 
 	static final int BLANK = 0;
 	static final int X = 1;
@@ -14,24 +14,31 @@ public class ReallySimpleAI {
 	static final int WIN = 100;
 	static final int LOSE = -100;
 	static final int DRAW = 0;
-	static final int TWOS_VAL = 1;
-	static final int BLOCK_VAL = 5;
-	
-	//static int AImove = 1;
+
 	static int curTurn = 0;
 	static boolean first = false;
 	
-
+	// Minimax, plus a few situational improvements
 	public static int Minimax(Board state, int maxPlayer) {
-		//int score = lastScore;
+		
 		boolean root = false;
 		if (first) { 
 			root = true; 
 			first = false;
-			
-			// First turn always results in this move, so this saves a ton of time
 			if (state.getMovesMade() == 0 && maxPlayer == X) {
 				return 1;
+			}
+			// See if a single move will lead to a win for maxPlayer
+			int winAt = state.whereToWin(maxPlayer);
+			if (winAt != 0) {
+				String pstr = (maxPlayer == X) ? "X" : "O";
+				System.out.println(pstr + " can win at " + winAt + "!");
+				return winAt;
+			}
+			// See if a single move could lead to a win for the opponent, and block it
+			int blockAt = state.whereToBlock(maxPlayer*-1);
+			if (blockAt != 0) {
+				return blockAt;
 			}
 			
 		}
@@ -107,8 +114,6 @@ public class ReallySimpleAI {
 		return score;
 	}
 	
-	
-	
 	public static Scanner sc = new Scanner(System.in); 
 	public static void main(String[] args) {
 	
@@ -127,32 +132,26 @@ public class ReallySimpleAI {
 			
 			int player = b.getCurrentPlayer();
 			int movePos = actions[a];
+
 			
-			if (player == X) {
-				//Board c = b;
-				first = true;
-				
-				//b.showBoard();
-				movePos = Minimax(b, player);
-				System.out.println("Minimax eval...");
-				b.showBoard();
-				System.out.println("Minimax chose: " + movePos);
-				
-			} else {
-				System.out.println("Player O chooses....");
-				movePos = sc.nextInt();
-			}
-			
+			first = true;
+
+			//b.showBoard();
+			movePos = Minimax(b, player);
+			System.out.println("Minimax eval...");
+			b.showBoard();
+			System.out.println("Minimax chose: " + movePos);
+
 			boolean moved = b.move(movePos);
 			if (!moved) { 
 				System.out.println("Error!  " +  movePos);
-				
 			}
 			b.showBoard();
 			
+			
+			
 			int winner = b.whoWon();
 			if (winner != 0) {
-				//System.out.println("woo!");
 				if (winner == X) { 	System.out.println("X Wins!\t Took: " + turn + " Moves.");
 				} else 				System.out.println("O Wins!\t Took: " + turn + " Moves.");
 				
@@ -161,6 +160,10 @@ public class ReallySimpleAI {
 			if (turn == 8) {
 				System.out.println("It's a draw!");
 			}
+			
+			// wait
+			System.out.println("Waiting for a signal...");
+			String go = sc.next();
 		}
 		
 		b.showBoard();

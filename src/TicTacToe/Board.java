@@ -5,16 +5,23 @@ public class Board {
 	public final int X = 1;
 	public final int O = -1;
 	private int movesMade = 0;
+	protected Square[] squares = new Square[9];
 	
 	public int getMovesMade() {
 		return movesMade;
 	}
-
-	private int[] played = new int[9];
-	private Square[] squares = new Square[9];
 	
+	public void moveMade() {
+		movesMade ++;
+	}
+	
+	public int getCurrentPlayer() {
+		//assert movesMade <= 9;
+		int player = (int) Math.pow(-1, movesMade);
+		return player;
+	}
+
 	public Board() {
-		for (int p: played) { p = 0; }
 		for (int i = 1; i <= 9; i++) {
 			squares[i-1] = new Square(i);
 		}
@@ -25,10 +32,10 @@ public class Board {
 	
 	public void clearSquare(int position) {
 		squares[position-1].clear();
+		movesMade --;
 	}
 	
 	public void clearBoard() {
-		for (int p: played) { p = 0; }
 		for (int i = 1; i <= 9; i++) {
 			squares[i-1] = new Square(i);
 		}
@@ -36,7 +43,8 @@ public class Board {
 		System.out.println("This board has been cleared.");
 	}
 	
-	public boolean move(int player, int position) { // plays an X or O in the designated square
+	public boolean move9B(int position, int player) { // plays an X or O in the designated square
+		//int player = getCurrentPlayer();
 		assert (player == X || player == O);
 		
 		int index = position-1;
@@ -60,19 +68,44 @@ public class Board {
 		return true;
 	}
 	
-	public Board result(int player, int position) { // plays an X or O in the designated square (minimax)
+	public boolean move(int position) { // plays an X or O in the designated square
+		int player = getCurrentPlayer();
+		assert (player == X || player == O);
+		
+		int index = position-1;
+		//System.out.println("INDEX: " + index);
+		Square sq = squares[index];
+		if (sq.getState() != BLANK) {
+			System.out.println("That square is occupied!");
+			return false;
+		}
+		
+		if (player == X) {
+			sq.playX();
+			System.out.println("X in square " + position);
+		}
+		if (player == O) {
+			sq.playO();
+			System.out.println("O in square " + position);
+		}
+		
+		movesMade ++;
+		return true;
+	}
+	
+	public Board result(int position) { // plays an X or O in the designated square (minimax)
+		int player = getCurrentPlayer();
 		assert (player == X || player == O);
 		
 		int index = position-1;
 		Square sq = squares[index];
 		assert sq.getState() == BLANK;
 		
-		/*
+		
 		if (sq.getState() != BLANK) {
 			System.out.println("That square is occupied!");
 			return null;
 		}
-		*/
 		
 		if (player == X) {
 			sq.playX();
@@ -98,13 +131,13 @@ public class Board {
 		return states;
 	}
 	
-	public void reconstruct(int[] allStates) {
-		assert allStates.length == 9;
+	public void reconstruct(int[] allSquares) {
+		assert allSquares.length == 9;
 		clearBoard();
 		int pos = 1;
-		for (int state: allStates) {
-			if (state != BLANK) { // If blank, leave it
-				move(state, pos); // Otherwise, place the needed mark there
+		for (int sq: allSquares) {
+			if (sq != BLANK) { // If blank, leave it
+				move(pos); // Otherwise, place the needed mark there
 			}
 			pos ++;
 		}
@@ -112,7 +145,7 @@ public class Board {
 	
 	public int[] emptySquares() { // Returns an array of all empty positions (possible actions)
 		int empty = 9 - movesMade;
-		if (empty == 0) return null;
+		if (empty <= 0) return null;
 		
 		int[] blanks = new int[empty];
 		int index = 0;
@@ -143,7 +176,10 @@ public class Board {
 	}
 	
 	public boolean isTerminal() {
-		if (movesMade == 9) {
+		if (this.movesMade >= 9) {
+			return true;
+		}
+		if (emptySquares() == null) { 
 			return true;
 		}
 		if (whoWon() != 0) {
@@ -176,7 +212,7 @@ public class Board {
             if (T[s] + T[s+3] + T[s+6] == -3)   { return O; }
         }
        
-        System.out.println("Nobody has won yet...");
+        //System.out.println("Nobody has won yet...");
         return BLANK;
     }
 	
@@ -253,7 +289,7 @@ public class Board {
 		}
 
 		String pstr = (opponent == X) ? "X" : "O";
-		System.out.println(pstr + " has " + enemyTwos + " twos.");
+		System.out.println(pstr + " has " + enemyTwos + " two(s).");
 		if (enemyTwos < 1) { return 0; }
 		else {
 			System.out.println("Must block at position " + blockPos + "!");
@@ -262,5 +298,65 @@ public class Board {
 		return blockPos;
 	}
 	
+	public int whereToWin(int player) { // Returns 0 if I can't win immediately, or the position to win
+		// All sets of three: ROWS 0,1,2; 3,4,5; 6,7,8; COLUMNS 0,3,6; 1,4,7; 2,5,8; DIAGONALS 0,4,8; 2,4,6
+		// Adding the lines of three will give 2 if X has two, -2 if O has two
+		assert (player == X || player == O);
+		if (movesMade < 3) { return 0; } // No twos can exist unless 3 moves were made.
+
+		int want = 2*player; // 2 for O, -2 for X
+		int winPos = 0;
+
+		int[] T = getAllStates();
+
+		// Check diagonals
+		if (T[0] + T[4] + T[8] == want) { // NW to SE
+			//enemyTwos ++;
+			for (int k = 0; k <= 8; k += 4) { // find the blank, set blockPos to that position
+				if (T[k] == BLANK) { winPos = k+1; break; }
+			}
+			return winPos;
+		}  
+		
+		if (T[2] + T[4] + T[6] == want) { // NE to SW
+			for (int k = 0; k <= 6; k += 2) { // find the blank, set blockPos to that position
+				if (T[k] == BLANK) { winPos = k+1; break; }
+			}
+			return winPos;
+		}  
+
+		for (int s = 0; s <= 6; s += 3) { // Horizontal
+			if (T[s] + T[s+1] + T[s+2] == want) {
+				for (int k = s; k <= s+2; k += 1) { // find the blank, set blockPos to that position
+					if (T[k] == BLANK) { winPos = k+1; break; }
+				}
+				return winPos;
+			}
+		}
+
+		for (int s = 0; s <= 2; s ++) { // Vertical
+			if (T[s] + T[s+3] + T[s+6] == want) {
+				for (int k = s; k <= s+6; k += 3) { // find the blank, set blockPos to that position
+					if (T[k] == BLANK) { winPos = k+1; break; }
+				}
+				return winPos;
+			}  
+		}
+		
+		// If no way to win, return 0
+		return winPos;
+	}
+	
+	
+	public int playerTotal(int player) { // adds all Xs and Os on the board
+		int sum = 0;
+		int[] all = this.getAllStates();
+		for (int s: all) {
+			sum += s;
+		}
+		
+		if (player == X) { return sum; }
+		else { return -1*sum; }
+	}
 	
 }

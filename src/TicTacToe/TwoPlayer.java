@@ -23,11 +23,11 @@ public class TwoPlayer {
 
 			try {
 				int p = (int) (Math.pow(-1, i)); // track whose turn it is. 1 for X, -1 for O.
-				boolean moved = b.move(p, s);
+				boolean moved = b.move(s);
 				while (!moved) {
 					System.out.println("Invalid! That's already taken. Try again. (1-9): ");
 					s = sc.nextInt();
-					moved = b.move(p, s);
+					moved = b.move(s);
 				}
 			} catch (Exception e) {
 				System.out.println(e.getMessage());

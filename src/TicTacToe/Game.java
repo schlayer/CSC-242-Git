@@ -66,7 +66,7 @@ public class Game {
 			System.out.println("\n loop \n");
 			
 			int act = actions[a];
-			cur = nextLevel[a] = state.result(mySide, act); // Create a array of results from possible actions
+			cur = nextLevel[a] = state.result(act); // Create a array of results from possible actions
 			//cur.showBoard();
 			int[] res = Minimax(cur, -1*mySide, act);
 			
@@ -119,7 +119,7 @@ public class Game {
 				act = Minimax(b, X, START)[1];
 			}
 			
-			boolean moved = b.move(player, act);
+			boolean moved = b.move(act);
 			int c = 1;
 			while (!moved) {
 				System.out.println("Invalid! That's already taken. Try again.");
@@ -127,7 +127,7 @@ public class Game {
 				act = Minimax(other, X, c)[1];
 				System.out.println("Minimax says: " + act);
 				
-				moved = b.move(player, act);
+				moved = b.move(act);
 				c++;
 				if (c > 9) {
 					System.out.println("Overflow!!!!!!!!!!!!!!!!");
