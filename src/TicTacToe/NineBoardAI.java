@@ -17,7 +17,7 @@ public class NineBoardAI{
 	static final int WIN = 100;
 	static final int LOSE = -100;
 	static final int DRAW = 0;
-	static final int BLOCK = 20;
+	static final int BLOCK = 25;
 	static final int TWOS = 5;
 	static final int ADVANTAGE = 4;
 
@@ -51,15 +51,8 @@ public class NineBoardAI{
 				System.out.println(pstr + " can win at " + winAt + "!");
 				return winAt;
 			}
-			// See if a single move could lead to a win for the opponent, and block it
-			/*
-			int blockAt = state.whereToBlock(maxPlayer*-1);
-			if (blockAt != 0) {
-				return blockAt;
-			}
-			*/
 		}
-
+		
 		if (state.getMovesMade() == 0) {
 			int[] corners = new int[] {9,7,3,1};
 			for (int c: corners) {
@@ -91,10 +84,6 @@ public class NineBoardAI{
 
 		int[] actions = state.emptySquares();
 
-		//System.out.println("Actions: ");
-		//for (int a: actions) { System.out.print(a + " "); }
-		//System.out.println("\n");
-
 		int optimalPos = actions[actions.length-1];
 
 		if (actions == null) {
@@ -120,7 +109,8 @@ public class NineBoardAI{
 			
 			curScore = Minimax(s1, maxPlayer, ++ turnNum);
 			
-			//curScore += s1.numTwos(maxPlayer) * TWOS; // add points for each two on this board
+			
+			curScore += s1.numTwos(maxPlayer) * TWOS; // add points for each two on this board
 			curScore += s2.playerTotal(maxPlayer) * ADVANTAGE; // add points if we have more, remove if they do
 			if (s2.whereToBlock(-1*maxPlayer) != 0) { // if we could lose on next board, factor this in
 				curScore += LOSE;
@@ -172,7 +162,9 @@ public class NineBoardAI{
 
 	public static void main(String[] args) {
 		bb = new BigBoard();
-
+		boolean AIvsHuman = false;
+		boolean AIvsAI = !AIvsHuman;
+		
 		//bb.showAllSmall();
 		//bb.printBigBoard();
 		
@@ -200,13 +192,20 @@ public class NineBoardAI{
 			System.out.println(pstr + "'s turn, playing in board " + nextBoard);
 			System.out.println("Pick a spot to move. (1-9): ");
 			int s = 1;
-			if (p == O) {
+
+			if (AIvsAI) {
 				s = Minimax(b, p, curTurn);
 			}
 			else {
-				System.out.println("Enter a move");
-				s = sc.nextInt();
+				if (p == O) {
+					s = Minimax(b, p, curTurn);
+				}
+				else {
+					System.out.println("Enter a move");
+					s = sc.nextInt();
+				}
 			}
+			
 			
 			try {
 				//int p = (int) (Math.pow(-1, turn)); // track whose turn it is. 1 for X, -1 for O.
@@ -220,8 +219,6 @@ public class NineBoardAI{
 				System.out.println(e.getMessage());
 				e.printStackTrace();
 			}
-
-			//b.showBoard();
 
 			int winner = b.whoWon();
 			if (winner != 0) {
