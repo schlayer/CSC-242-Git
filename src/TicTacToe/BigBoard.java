@@ -24,11 +24,11 @@ public class BigBoard { // for 9-Board
 		
 		int bindex = smallBoard -1;
 		Board b = boards[bindex];
-		System.out.println("In board " + smallBoard);
+		System.err.println("In board " + smallBoard);
 
 		boolean moved = b.move9B(position, player);
 		if (moved) { movesMade ++; }
-		else { System.out.println("Something went wrong!"); }
+		else { System.err.println("Something went wrong!"); }
 		
 		return moved;
 	}
@@ -39,13 +39,13 @@ public class BigBoard { // for 9-Board
 			boards[i-1] = new Board(i);
 		}
 		this.movesMade = 0;
-		System.out.println("This board has been created.");
+		System.err.println("This board has been created.");
 	}
 	
 	public void showAllSmall() {
 		int bNum = 1;
 		for (Board b: boards) {
-			System.out.println("Board " + bNum + ":");
+			System.err.println("Board " + bNum + ":");
 			b.showBoard();
 			bNum ++;
 		}
@@ -60,7 +60,7 @@ public class BigBoard { // for 9-Board
 	}
 	
 	public void printBigBoard() {
-		System.out.println(this.toString());
+		System.err.println(this.toString());
 	}
 	
 	public boolean isTerminal() { // checks each small board to see if in a terminal state

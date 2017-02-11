@@ -15,9 +15,6 @@ public class NineBoardTwoP{
 	public static void main(String[] args) {
 		BigBoard bb = new BigBoard();
 		
-		//bb.showAllSmall();
-		//bb.printBigBoard();
-		
 		Random r = new Random();
 		
 		for (int turn = 0; turn <= 81; turn++) {

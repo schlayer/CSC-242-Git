@@ -269,12 +269,28 @@ public class NineBoardAI{
 	/** ====================================================================================== **/
 	/** ===================================== MAIN =========================================== **/
 	/** ====================================================================================== **/
+/*
+ 
+ Start by asking the user if they want to play X or O. Your program should read a
+line that will be either “x” or “o” in response (you should handle upper and lower
+case). As stated above, you may assume that X moves first.
+• For the opponent’s moves, I would print the board to the standard error and prompt
+for a move. Read the move (a line with one number for Basic TTT; two numbers
+for 9-Board as described below). Check that the move is legal. Then apply it, and
+maybe print the board again.
+• For the computer’s moves, call your state-space search method to compute the
+move, print it to standard output, apply it, and print the board (to stderr).
+• Print messages to stderr during the search or summary statistics after a search
+that illustrate the operation of your program.
+• When the game is over, print out who won and start a new game (this will allow us
+to play programs among many teams automatically).
 
+ */
 	public static void main(String[] args) {
-		System.gc();
+		System.gc(); // collect garbage
 		
 		bb = new BigBoard();
-		boolean AIvsHuman = false;
+		boolean AIvsHuman = true;
 		boolean AIvsAI = !AIvsHuman;
 		
 		Random r = new Random();
