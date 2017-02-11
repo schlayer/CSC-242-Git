@@ -2,6 +2,7 @@ package TicTacToe;
 
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Timer;
 
 public class NineBoardAI{
 	static int nextBoard = 0;
@@ -24,14 +25,22 @@ public class NineBoardAI{
 	static boolean first = false;
 	static BigBoard bb;
 	
+	static Timer time = new Timer("Calc");
+	static long startTime = System.currentTimeMillis();
+	
 	public static Scanner sc = new Scanner(System.in);
 
-	
+	public static boolean timeOut() { // Says if time limit was reached
+		long timeLimit = 10000; // Limit in milliseconds 
+		return ((System.currentTimeMillis() - startTime) > timeLimit);
+	}
 	
 	public static int Minimax(Board state, int maxPlayer, int turnNum) {
+		
 		int score = 0;
 		boolean root = false;
 		if (first) {
+			startTime = System.currentTimeMillis();
 			turnNum = curTurn;
 			root = true; 
 			first = false;
@@ -43,16 +52,19 @@ public class NineBoardAI{
 				return winAt;
 			}
 			// See if a single move could lead to a win for the opponent, and block it
+			/*
 			int blockAt = state.whereToBlock(maxPlayer*-1);
 			if (blockAt != 0) {
 				return blockAt;
 			}
+			*/
 		}
-		
+
 		if (state.getMovesMade() == 0) {
 			int[] corners = new int[] {9,7,3,1};
 			for (int c: corners) {
 				Board k = bb.getBoard(c);
+				if (k.position == c) { continue; }
 				if (k.getMovesMade() == 0) {
 					return c;
 				}
@@ -60,6 +72,7 @@ public class NineBoardAI{
 			int[] other = new int[] {2,4,5,6,8};
 			for (int o: other) {
 				Board k = bb.getBoard(o);
+				if (k.position == o) { continue; }
 				if (k.getMovesMade() == 0) {
 					return o;
 				}
@@ -128,6 +141,11 @@ public class NineBoardAI{
 			}
 			
 			s1.clearSquare(act);
+			
+			if (timeOut()) {
+				System.out.println("Time is up!");
+				break;
+			}
 		}
 
 		if (state.getCurrentPlayer() == maxPlayer) {
@@ -140,7 +158,7 @@ public class NineBoardAI{
 
 		if (root) { // if at the 'root' of recursive tree
 			System.out.println("\n\t\tRoot: RETURNING POS\n");
-			//System.out.println("Root!");
+			System.out.println("Evaluation time: " + (System.currentTimeMillis() - startTime) + " ms");
 			return optimalPos;
 		}
 
@@ -163,7 +181,7 @@ public class NineBoardAI{
 		for (int turn = 0; turn <= 81; turn++) {
 			curTurn = turn;
 			int p = (int) (Math.pow(-1, turn)); // track whose turn it is. 1 for X, -1 for O.
-			bb.printBigBoard();
+			//bb.printBigBoard();
 			first = true;
 			
 			if (nextBoard == 0 || pick) {

@@ -36,7 +36,7 @@ public class BigBoard { // for 9-Board
 	public BigBoard() {
 		this.boards = new Board[9];
 		for (int i = 1; i <= 9; i++) {
-			boards[i-1] = new Board();
+			boards[i-1] = new Board(i);
 		}
 		this.movesMade = 0;
 		System.out.println("This board has been created.");

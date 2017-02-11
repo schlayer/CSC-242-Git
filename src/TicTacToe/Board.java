@@ -6,6 +6,7 @@ public class Board {
 	public final int O = -1;
 	private int movesMade = 0;
 	protected Square[] squares = new Square[9];
+	protected int position = 0;
 	
 	public int getMovesMade() {
 		return movesMade;
@@ -21,13 +22,22 @@ public class Board {
 		return player;
 	}
 
-	public Board() {
+	public Board() { // Normal Constructor
 		for (int i = 1; i <= 9; i++) {
 			squares[i-1] = new Square(i);
 		}
 		this.movesMade = 0;
 		System.out.println("This board has been created.");
 		
+	}
+	
+	public Board(int position) { // 9-Board constructor
+		this.position = position;
+		for (int i = 1; i <= 9; i++) {
+			squares[i-1] = new Square(i);
+		}
+		this.movesMade = 0;
+		//System.out.println("This board has been created.");
 	}
 	
 	public void clearSquare(int position) {
@@ -265,7 +275,7 @@ public class Board {
 		}  
 		if (T[2] + T[4] + T[6] == want) { // NE to SW
 			enemyTwos ++;
-			for (int k = 0; k <= 6; k += 2) { // find the blank, set blockPos to that position
+			for (int k = 2; k <= 6; k += 2) { // find the blank, set blockPos to that position
 				if (T[k] == BLANK) { blockPos = k+1; break; }
 			}
 		}  
@@ -304,22 +314,21 @@ public class Board {
 		assert (player == X || player == O);
 		if (movesMade < 3) { return 0; } // No twos can exist unless 3 moves were made.
 
-		int want = 2*player; // 2 for O, -2 for X
+		int want = 2*player; // 2 for X, -2 for O
 		int winPos = 0;
 
 		int[] T = getAllStates();
 
 		// Check diagonals
 		if (T[0] + T[4] + T[8] == want) { // NW to SE
-			//enemyTwos ++;
-			for (int k = 0; k <= 8; k += 4) { // find the blank, set blockPos to that position
+			for (int k = 0; k <= 8; k += 4) { // find the blank, set winPos to that position
 				if (T[k] == BLANK) { winPos = k+1; break; }
 			}
 			return winPos;
 		}  
 		
 		if (T[2] + T[4] + T[6] == want) { // NE to SW
-			for (int k = 0; k <= 6; k += 2) { // find the blank, set blockPos to that position
+			for (int k = 2; k <= 6; k += 2) { // find the blank, set winPos to that position
 				if (T[k] == BLANK) { winPos = k+1; break; }
 			}
 			return winPos;
@@ -327,7 +336,7 @@ public class Board {
 
 		for (int s = 0; s <= 6; s += 3) { // Horizontal
 			if (T[s] + T[s+1] + T[s+2] == want) {
-				for (int k = s; k <= s+2; k += 1) { // find the blank, set blockPos to that position
+				for (int k = s; k <= s+2; k += 1) { // find the blank, set winPos to that position
 					if (T[k] == BLANK) { winPos = k+1; break; }
 				}
 				return winPos;
@@ -336,7 +345,7 @@ public class Board {
 
 		for (int s = 0; s <= 2; s ++) { // Vertical
 			if (T[s] + T[s+3] + T[s+6] == want) {
-				for (int k = s; k <= s+6; k += 3) { // find the blank, set blockPos to that position
+				for (int k = s; k <= s+6; k += 3) { // find the blank, set winPos to that position
 					if (T[k] == BLANK) { winPos = k+1; break; }
 				}
 				return winPos;
