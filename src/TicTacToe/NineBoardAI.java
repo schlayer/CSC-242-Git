@@ -17,9 +17,9 @@ public class NineBoardAI{
 	static final int WIN = 100;
 	static final int LOSE = -100;
 	static final int DRAW = 0;
-	static final int BLOCK = 25;
-	static final int TWOS = 5;
-	static final int ADVANTAGE = 4;
+	static final int BLOCK = 15;
+	static final int TWOS = 15;
+	static final int ADVANTAGE = 6;
 
 	static int curTurn = 0;
 	static boolean first = false;
@@ -30,16 +30,26 @@ public class NineBoardAI{
 	
 	public static Scanner sc = new Scanner(System.in);
 
-	public static boolean timeOut() { // Says if time limit was reached
+	static boolean timeOut() { // Says if time limit was reached
 		long timeLimit = 10000; // Limit in milliseconds 
 		return ((System.currentTimeMillis() - startTime) > timeLimit);
 	}
 	
+	// Save memory
+	static int[] corners = new int[] {9,7,3,1};
+	static int[] other = new int[] {2,4,5,6,8};
+	
+	// Heuristics
 	public static int Minimax(Board state, int maxPlayer, int turnNum) {
-		
 		int score = 0;
 		boolean root = false;
 		if (first) {
+			if (pick) {
+				Random r = new Random();
+				int rB = r.nextInt(9) + 1;
+				return rB; 
+			}
+			
 			startTime = System.currentTimeMillis();
 			turnNum = curTurn;
 			root = true; 
@@ -48,32 +58,144 @@ public class NineBoardAI{
 			int winAt = state.whereToWin(maxPlayer);
 			if (winAt != 0) {
 				String pstr = (maxPlayer == X) ? "X" : "O";
-				System.out.println(pstr + " can win at " + winAt + "!");
+				System.err.println(pstr + " can win at " + winAt + "!");
 				return winAt;
 			}
 		}
-		
+
+		// If in a board with no moves, make opponent move in it
 		if (state.getMovesMade() == 0) {
-			int[] corners = new int[] {9,7,3,1};
+			int pos = state.getPosition();
+			return pos;
+			
+			/*
 			for (int c: corners) {
 				Board k = bb.getBoard(c);
-				if (k.position == c) { continue; }
 				if (k.getMovesMade() == 0) {
 					return c;
 				}
 			}
-			int[] other = new int[] {2,4,5,6,8};
+			
 			for (int o: other) {
 				Board k = bb.getBoard(o);
-				if (k.position == o) { continue; }
 				if (k.getMovesMade() == 0) {
 					return o;
 				}
 			}
+			*/
+		}
+
+		if (state.isTerminal() || turnNum >= 80) { // if terminal, return the score
+			//System.err.println("Term!");
+			int winner = state.whoWon();
+			if (winner == 0) { return DRAW; }
+			else {
+				if (winner == maxPlayer) { return WIN; }
+				else { return LOSE; }
+			}
+		}
+
+		int[] actions = state.emptySquares();
+
+		if (actions == null) {
+			System.err.println("No actions!");
+			return score;
 		}
 		
+		int optimalPos = actions[actions.length-1];
+
+		int minPos = actions[actions.length-1];
+		int maxPos = actions[actions.length-1];
+		int minScore = 1000;
+		int maxScore = -1000;
+		int curScore = score;
+
+		for (int act: actions) { // Evaluate for all possible actions
+			Board s1 = state; // this mini board
+			Board s2 = bb.getBoard(act); // next mini board
+			s1 = s1.result(act);
+			if (s1 == null) {
+				continue;
+			}
+
+			//System.err.println("Evaluating position " + act + " for turn " + turnNum);
+
+			curScore = Minimax(s1, maxPlayer, ++ turnNum);
+
+
+			curScore += s1.numTwos(maxPlayer) * TWOS; // add points for each two on this board
+			curScore += s2.playerTotal(maxPlayer) * ADVANTAGE; // add points if we have more, remove if they do
+			if (s2.whereToBlock(-1*maxPlayer) != 0) { // if we could lose on next board, factor this in
+				curScore += LOSE;
+			}
+			if (s2.whereToWin(maxPlayer) != 0) { // if we could win on next board, factor this in
+				curScore -= BLOCK;
+			}
+
+			//s2.showBoard();
+			if (curScore > maxScore) { // Update max
+				maxPos = act;
+				maxScore = curScore;
+			}
+			if (curScore < minScore) { // Update min
+				minPos = act;
+				minScore = curScore;
+			}
+
+			s1.clearSquare(act);
+
+			if (timeOut()) {
+				System.err.println("Time is up!");
+				break;
+			}
+		}
+
+		if (state.getCurrentPlayer() == maxPlayer) {
+			score = maxScore;
+			optimalPos = maxPos;
+		} else { 
+			score = minScore; 
+			optimalPos = minPos;
+		}
+
+		if (root) { // if at the 'root' of recursive tree
+			System.err.println("\n\tRoot: " + score + "\n");
+			System.err.println("Evaluation time: " + (System.currentTimeMillis() - startTime) + " ms");
+			return optimalPos;
+		}
+		
+		actions = null; // save memory
+		return score;
+	}
+	
+	
+	// No heuristics at all
+	public static int Minimax2(Board state, int maxPlayer, int turnNum) {
+
+		int score = 0;
+		boolean root = false;
+		if (first) {
+			if (pick) {
+				Random r = new Random();
+				int rB = r.nextInt(9) + 1;
+				return rB; 
+			}
+			
+			startTime = System.currentTimeMillis();
+			turnNum = curTurn;
+			root = true; 
+			first = false;
+			// See if a single move will lead to a win for maxPlayer
+			int winAt = state.whereToWin(maxPlayer);
+			if (winAt != 0) {
+				String pstr = (maxPlayer == X) ? "X" : "O";
+				System.err.println(pstr + " can win at " + winAt + "!");
+				return winAt;
+			}
+		}
+
 		if (state.isTerminal() || turnNum >= 80) { // if terminal, return the score
-			System.out.println("Term!");
+			//System.err.println("Term!");
 			int winner = state.whoWon();
 			if (winner == 0) { return DRAW; }
 			else {
@@ -87,7 +209,7 @@ public class NineBoardAI{
 		int optimalPos = actions[actions.length-1];
 
 		if (actions == null) {
-			System.out.println("No actions!");
+			System.err.println("No actions!");
 			return score;
 		}
 
@@ -105,22 +227,10 @@ public class NineBoardAI{
 				continue;
 			}
 
-			System.out.println("Evaluating position " + act + " for turn " + s1.getMovesMade());
-			
-			curScore = Minimax(s1, maxPlayer, ++ turnNum);
-			
-			
-			curScore += s1.numTwos(maxPlayer) * TWOS; // add points for each two on this board
-			curScore += s2.playerTotal(maxPlayer) * ADVANTAGE; // add points if we have more, remove if they do
-			if (s2.whereToBlock(-1*maxPlayer) != 0) { // if we could lose on next board, factor this in
-				curScore += LOSE;
-			}
-			if (s2.whereToWin(maxPlayer) != 0) { // if we could win on next board, factor this in
-				curScore -= BLOCK;
-			}
-			
-			
-			//s2.showBoard();
+			//System.err.println("Evaluating position " + act + " for turn " + turnNum);
+
+			curScore = Minimax2(s1, maxPlayer, ++ turnNum);
+
 			if (curScore > maxScore) { // Update max
 				maxPos = act;
 				maxScore = curScore;
@@ -129,11 +239,11 @@ public class NineBoardAI{
 				minPos = act;
 				minScore = curScore;
 			}
-			
+
 			s1.clearSquare(act);
-			
+
 			if (timeOut()) {
-				System.out.println("Time is up!");
+				System.err.println("Time is up!");
 				break;
 			}
 		}
@@ -147,26 +257,25 @@ public class NineBoardAI{
 		}
 
 		if (root) { // if at the 'root' of recursive tree
-			System.out.println("\n\t\tRoot: RETURNING POS\n");
-			System.out.println("Evaluation time: " + (System.currentTimeMillis() - startTime) + " ms");
+			System.err.println("\n\tnoH Root: " + score + "\n");
+			System.err.println("Evaluation time: " + (System.currentTimeMillis() - startTime) + " ms");
 			return optimalPos;
 		}
-
-		// Score is better for fewer moves to win
-		//score = score + (9 - state.getMovesMade());
-
+		
+		actions = null; // save memory
 		return score;
 	}
 
 	/** ====================================================================================== **/
+	/** ===================================== MAIN =========================================== **/
+	/** ====================================================================================== **/
 
 	public static void main(String[] args) {
+		System.gc();
+		
 		bb = new BigBoard();
 		boolean AIvsHuman = false;
 		boolean AIvsAI = !AIvsHuman;
-		
-		//bb.showAllSmall();
-		//bb.printBigBoard();
 		
 		Random r = new Random();
 		
@@ -177,31 +286,40 @@ public class NineBoardAI{
 			first = true;
 			
 			if (nextBoard == 0 || pick) {
-				System.out.println("Pick a board to move in. (1-9): ");
-				nextBoard = sc.nextInt();
+				System.err.println("Pick a board to move in. (1-9): ");
+				if (AIvsAI) nextBoard = Minimax(new Board(), p, curTurn);
+				else nextBoard = sc.nextInt();
 				pick = false;
 			}
 			
 			Board b = bb.getBoard(nextBoard);
 			while (b.isTerminal()) {
-				System.out.println("That board is filled. Try again! (1-9): ");
+				System.err.println("That board is filled. Try again! (1-9): ");
 				nextBoard = sc.nextInt();
 				b = bb.getBoard(nextBoard);
 			}
 			String pstr = (p == X) ? "X" : "O";
-			System.out.println(pstr + "'s turn, playing in board " + nextBoard);
-			System.out.println("Pick a spot to move. (1-9): ");
+			System.err.println(pstr + "'s turn, playing in board " + nextBoard);
+			
 			int s = 1;
 
 			if (AIvsAI) {
-				s = Minimax(b, p, curTurn);
+				boolean m1vm2 = true;
+				if (m1vm2) {
+					s = (p == X) ? Minimax(b, p, curTurn) : Minimax(b, p, curTurn);
+				}
+				else {
+					s = Minimax(b, p, curTurn);
+				}
+				System.err.println("Minimax chose: " + s);
 			}
 			else {
 				if (p == O) {
 					s = Minimax(b, p, curTurn);
+					System.err.println("Minimax chose: " + s);
 				}
 				else {
-					System.out.println("Enter a move");
+					System.err.println("Pick a spot to move. (1-9): ");
 					s = sc.nextInt();
 				}
 			}
@@ -211,45 +329,42 @@ public class NineBoardAI{
 				//int p = (int) (Math.pow(-1, turn)); // track whose turn it is. 1 for X, -1 for O.
 				boolean moved = bb.move(nextBoard, s);
 				while (!moved) {
-					System.out.println("Invalid! That's already taken. Try again. (1-9): ");
+					System.err.println("Invalid! That's already taken. Try again. (1-9): ");
 					s = sc.nextInt();
 					moved = bb.move(nextBoard, s);
 				}
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.err.println(e.getMessage());
 				e.printStackTrace();
 			}
 
 			int winner = b.whoWon();
 			if (winner != 0) {
-				//System.out.println("woo!");
-				if (winner == X) { 	System.out.println("X Wins!\t Took: " + turn + " Moves.");
-				} else 				System.out.println("O Wins!\t Took: " + turn + " Moves.");
+				//System.err.println("woo!");
+				if (winner == X) { 	System.err.println("\nX Wins!\t Took: " + turn + " Moves.");
+				} else 				System.err.println("\nO Wins!\t Took: " + turn + " Moves.");
 				
 				break;
 			}
 			if (b.isTerminal()) {
-				System.out.println("Board " + nextBoard + " is now in a draw!");
+				System.err.println("Board " + nextBoard + " is now in a draw!");
 				pick = true;
 			}
 			if (turn == 80) {
-				System.out.println("It's a draw!");
+				System.err.println("It's a draw!");
 			}
 			
 			bb.printBigBoard();
 			
 			nextBoard = s;
 			
-			boolean wait = false;
-			if (wait) {
-				// wait
-				System.out.println("Waiting for a signal...");
-				String go = sc.next();
-			}
 		}
 		
 		bb.printBigBoard();;
-		System.out.println("That's the game. Thanks for playing!");
+		System.err.println("That's the game. Thanks for playing!");
+		
+		System.exit(0); // Prevents the VM from holding onto all its memory
+		// Failing this, running my program consumes up to 100MB of memory every time
 
 	}
 

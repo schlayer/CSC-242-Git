@@ -6,10 +6,16 @@ public class Board {
 	public final int O = -1;
 	private int movesMade = 0;
 	protected Square[] squares = new Square[9];
-	protected int position = 0;
+	private int position = 0;
+	
+	protected boolean print = false;
 	
 	public int getMovesMade() {
 		return movesMade;
+	}
+	
+	public int getPosition() {
+		return position;
 	}
 	
 	public void moveMade() {
@@ -27,7 +33,7 @@ public class Board {
 			squares[i-1] = new Square(i);
 		}
 		this.movesMade = 0;
-		System.out.println("This board has been created.");
+		if (print) System.err.println("This board has been created.");
 		
 	}
 	
@@ -37,7 +43,7 @@ public class Board {
 			squares[i-1] = new Square(i);
 		}
 		this.movesMade = 0;
-		//System.out.println("This board has been created.");
+		//if (print) System.err.println("This board has been created.");
 	}
 	
 	public void clearSquare(int position) {
@@ -50,7 +56,7 @@ public class Board {
 			squares[i-1] = new Square(i);
 		}
 		this.movesMade = 0;
-		System.out.println("This board has been cleared.");
+		if (print) System.err.println("This board has been cleared.");
 	}
 	
 	public boolean move9B(int position, int player) { // plays an X or O in the designated square
@@ -58,20 +64,20 @@ public class Board {
 		assert (player == X || player == O);
 		
 		int index = position-1;
-		//System.out.println("INDEX: " + index);
+		//if (print) System.err.println("INDEX: " + index);
 		Square sq = squares[index];
 		if (sq.getState() != BLANK) {
-			System.out.println("That square is occupied!");
+			if (print) System.err.println("That square is occupied!");
 			return false;
 		}
 		
 		if (player == X) {
 			sq.playX();
-			System.out.println("X in square " + position);
+			if (print) System.err.println("X in square " + position);
 		}
 		if (player == O) {
 			sq.playO();
-			System.out.println("O in square " + position);
+			if (print) System.err.println("O in square " + position);
 		}
 		
 		movesMade ++;
@@ -83,20 +89,20 @@ public class Board {
 		assert (player == X || player == O);
 		
 		int index = position-1;
-		//System.out.println("INDEX: " + index);
+		//if (print) System.err.println("INDEX: " + index);
 		Square sq = squares[index];
 		if (sq.getState() != BLANK) {
-			System.out.println("That square is occupied!");
+			if (print) System.err.println("That square is occupied!");
 			return false;
 		}
 		
 		if (player == X) {
 			sq.playX();
-			System.out.println("X in square " + position);
+			if (print) System.err.println("X in square " + position);
 		}
 		if (player == O) {
 			sq.playO();
-			System.out.println("O in square " + position);
+			if (print) System.err.println("O in square " + position);
 		}
 		
 		movesMade ++;
@@ -113,17 +119,17 @@ public class Board {
 		
 		
 		if (sq.getState() != BLANK) {
-			System.out.println("That square is occupied!");
+			if (print) System.err.println("That square is occupied!");
 			return null;
 		}
 		
 		if (player == X) {
 			sq.playX();
-			//System.out.println("X in square " + position);
+			//if (print) System.err.println("X in square " + position);
 		}
 		if (player == O) {
 			sq.playO();
-			//System.out.println("O in square " + position);
+			//if (print) System.err.println("O in square " + position);
 		}
 		
 		movesMade ++;
@@ -182,13 +188,10 @@ public class Board {
 	}
 	
 	public void showBoard() { // Print the whole board
-		System.out.println(this.toString());
+		if (print) System.err.println(this.toString());
 	}
 	
 	public boolean isTerminal() {
-		if (this.movesMade >= 9) {
-			return true;
-		}
 		if (emptySquares() == null) { 
 			return true;
 		}
@@ -222,7 +225,7 @@ public class Board {
             if (T[s] + T[s+3] + T[s+6] == -3)   { return O; }
         }
        
-        //System.out.println("Nobody has won yet...");
+        //if (print) System.err.println("Nobody has won yet...");
         return BLANK;
     }
 	
@@ -250,7 +253,7 @@ public class Board {
 		}
 
 		String pstr = (player == X) ? "X" : "O";
-		System.out.println(pstr + " has " + twos + " twos.");
+		if (print) System.err.println(pstr + " has " + twos + " twos.");
 		return twos;
 	}
 
@@ -299,10 +302,10 @@ public class Board {
 		}
 
 		String pstr = (opponent == X) ? "X" : "O";
-		System.out.println(pstr + " has " + enemyTwos + " two(s).");
+		if (print) System.err.println(pstr + " has " + enemyTwos + " two(s).");
 		if (enemyTwos < 1) { return 0; }
 		else {
-			System.out.println("Must block at position " + blockPos + "!");
+			if (print) System.err.println("Must block at position " + blockPos + "!");
 		}
 
 		return blockPos;

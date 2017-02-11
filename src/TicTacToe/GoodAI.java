@@ -32,7 +32,7 @@ public class GoodAI {
 			int winAt = state.whereToWin(maxPlayer);
 			if (winAt != 0) {
 				String pstr = (maxPlayer == X) ? "X" : "O";
-				System.out.println(pstr + " can win at " + winAt + "!");
+				System.err.println(pstr + " can win at " + winAt + "!");
 				return winAt;
 			}
 			// See if a single move could lead to a win for the opponent, and block it
@@ -45,7 +45,7 @@ public class GoodAI {
 		
 		int score = 0;
 		if (state.isTerminal()) { // if terminal, return the score
-			System.out.println("Term!");
+			System.err.println("Term!");
 			int winner = state.whoWon();
 			if (winner == 0) { return DRAW; }
 			else {
@@ -56,14 +56,14 @@ public class GoodAI {
 		
 		int[] actions = state.emptySquares();
 		
-		//System.out.println("Actions: ");
-		//for (int a: actions) { System.out.print(a + " "); }
-		//System.out.println("\n");
+		//System.err.println("Actions: ");
+		//for (int a: actions) { System.err.print(a + " "); }
+		//System.err.println("\n");
 		
 		int optimalPos = actions[actions.length-1];
 		
 		if (actions == null) {
-			System.out.println("No actions!");
+			System.err.println("No actions!");
 			return score;
 		}
 		
@@ -80,7 +80,7 @@ public class GoodAI {
 				continue;
 			}
 			
-			System.out.println("Evaluating position " + act + " for turn " + s2.getMovesMade());
+			System.err.println("Evaluating position " + act + " for turn " + s2.getMovesMade());
 			curScore = Minimax(s2, maxPlayer);
 			//s2.showBoard();
 			if (curScore > maxScore) { // Update max
@@ -103,8 +103,8 @@ public class GoodAI {
 		}
 
 		if (root) { // if at the 'root' of recursive tree
-			System.out.println("\n\t\tRoot: RETURNING POS\n");
-			//System.out.println("Root!");
+			System.err.println("\n\t\tRoot: RETURNING POS\n");
+			//System.err.println("Root!");
 			return optimalPos;
 		}
 		 
@@ -118,6 +118,7 @@ public class GoodAI {
 	public static void main(String[] args) {
 	
 		Board b = new Board();
+		b.print = true;
 		
 		//b.showBoard();
 		
@@ -141,16 +142,16 @@ public class GoodAI {
 			if (player == O) {
 				movePos = Minimax(b, player);
 			} else {
-				System.out.println("Enter a position (1-9)");
+				System.err.println("Enter a position (1-9)");
 				movePos = sc.nextInt();
 			}
-			System.out.println("Minimax eval...");
+			System.err.println("Minimax eval...");
 			b.showBoard();
-			System.out.println("Minimax chose: " + movePos);
+			System.err.println("Minimax chose: " + movePos);
 
 			boolean moved = b.move(movePos);
 			if (!moved) { 
-				System.out.println("Error!  " +  movePos);
+				System.err.println("Error!  " +  movePos);
 			}
 			b.showBoard();
 			
@@ -158,17 +159,17 @@ public class GoodAI {
 			
 			int winner = b.whoWon();
 			if (winner != 0) {
-				if (winner == X) { 	System.out.println("X Wins!\t Took: " + turn + " Moves.");
-				} else 				System.out.println("O Wins!\t Took: " + turn + " Moves.");
+				if (winner == X) { 	System.err.println("X Wins!\t Took: " + turn + " Moves.");
+				} else 				System.err.println("O Wins!\t Took: " + turn + " Moves.");
 				
 				break;
 			}
 			if (turn == 9) {
-				System.out.println("It's a draw!");
+				System.err.println("It's a draw!");
 			}
 			
 			// wait
-			//System.out.println("Waiting for a signal...");
+			//System.err.println("Waiting for a signal...");
 			//String go = sc.next();
 		}
 		

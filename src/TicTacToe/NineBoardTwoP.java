@@ -25,32 +25,32 @@ public class NineBoardTwoP{
 			bb.printBigBoard();
 			
 			if (nextBoard == 0 || pick) {
-				System.out.println("Pick a board to move in. (1-9): ");
+				System.err.println("Pick a board to move in. (1-9): ");
 				nextBoard = sc.nextInt();
 				pick = false;
 			}
 			
 			Board b = bb.getBoard(nextBoard);
 			while (b.isTerminal()) {
-				System.out.println("That board is filled. Try again! (1-9): ");
+				System.err.println("That board is filled. Try again! (1-9): ");
 				nextBoard = sc.nextInt();
 				b = bb.getBoard(nextBoard);
 			}
 			String pstr = (p == X) ? "X" : "O";
-			System.out.println(pstr + "'s turn, playing in board " + nextBoard);
-			System.out.println("Pick a spot to move. (1-9): ");
+			System.err.println(pstr + "'s turn, playing in board " + nextBoard);
+			System.err.println("Pick a spot to move. (1-9): ");
 			int s = sc.nextInt();
 			
 			try {
 				
 				boolean moved = bb.move(nextBoard, s);
 				while (!moved) {
-					System.out.println("Invalid! That's already taken. Try again. (1-9): ");
+					System.err.println("Invalid! That's already taken. Try again. (1-9): ");
 					s = sc.nextInt();
 					moved = bb.move(nextBoard, s);
 				}
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.err.println(e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -58,25 +58,25 @@ public class NineBoardTwoP{
 
 			int winner = b.whoWon();
 			if (winner != 0) {
-				//System.out.println("woo!");
-				if (winner == X) { 	System.out.println("X Wins!\t Took: " + turn + " Moves.");
-				} else 				System.out.println("O Wins!\t Took: " + turn + " Moves.");
+				//System.err.println("woo!");
+				if (winner == X) { 	System.err.println("X Wins!\t Took: " + turn + " Moves.");
+				} else 				System.err.println("O Wins!\t Took: " + turn + " Moves.");
 				
 				break;
 			}
 			if (b.isTerminal()) {
-				System.out.println("Board " + nextBoard + " is now in a draw!");
+				System.err.println("Board " + nextBoard + " is now in a draw!");
 				pick = true;
 			}
 			if (turn == 80) {
-				System.out.println("It's a draw!");
+				System.err.println("It's a draw!");
 			}
 			
 			nextBoard = s;
 		}
 		
 		bb.printBigBoard();;
-		System.out.println("That's the game. Thanks for playing!");
+		System.err.println("That's the game. Thanks for playing!");
 
 	}
 
