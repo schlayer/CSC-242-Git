@@ -31,7 +31,8 @@ public class NineBoardAI{
 	public static Scanner sc = new Scanner(System.in);
 
 	static boolean timeOut() { // Says if time limit was reached
-		long timeLimit = 10000; // Limit in milliseconds 
+		long timeLimit = 30000; // Limit in milliseconds 
+		//System.err.println((System.currentTimeMillis() - startTime));
 		return ((System.currentTimeMillis() - startTime) > timeLimit);
 	}
 	
@@ -85,7 +86,7 @@ public class NineBoardAI{
 			*/
 		}
 
-		if (state.isTerminal() || turnNum >= 80) { // if terminal, return the score
+		if (state.isTerminal() || turnNum > 80) { // if terminal, return the score
 			//System.err.println("Term!");
 			int winner = state.whoWon();
 			if (winner == 0) { return DRAW; }
@@ -106,33 +107,36 @@ public class NineBoardAI{
 
 		int minPos = actions[actions.length-1];
 		int maxPos = actions[actions.length-1];
-		int minScore = 1000;
-		int maxScore = -1000;
+		int minScore = 0;
+		int maxScore = 0;
 		int curScore = score;
 
 		for (int act: actions) { // Evaluate for all possible actions
 			Board s1 = state; // this mini board
-			Board s2 = bb.getBoard(act); // next mini board
 			s1 = s1.result(act);
 			if (s1 == null) {
 				continue;
 			}
 
 			//System.err.println("Evaluating position " + act + " for turn " + turnNum);
-
-			curScore = Minimax(s1, maxPlayer, ++ turnNum);
-
+			
+			// Stop going deeper after some number of turns past curTurn
+			// Turn 1: 5. Turn 6: 9. Turn 21: 19. Turn 46+: to the endgame
+			if (turnNum - curTurn <= 5 + Math.floor(turnNum / 1.5)) {
+				Board s2 = bb.getBoard(act); // next mini board
+				
+				curScore = Minimax(s2, maxPlayer, ++ turnNum);
+				curScore += s2.playerTotal(maxPlayer) * ADVANTAGE; // add points if we have more, remove if they do
+				if (s2.whereToBlock(-1*maxPlayer) != 0) { // if we could lose on next board, factor this in
+					curScore += LOSE;
+				}
+				if (s2.whereToWin(maxPlayer) != 0) { // if we could win on next board, factor this in
+					curScore -= BLOCK;
+				}
+			} 
 
 			curScore += s1.numTwos(maxPlayer) * TWOS; // add points for each two on this board
-			curScore += s2.playerTotal(maxPlayer) * ADVANTAGE; // add points if we have more, remove if they do
-			if (s2.whereToBlock(-1*maxPlayer) != 0) { // if we could lose on next board, factor this in
-				curScore += LOSE;
-			}
-			if (s2.whereToWin(maxPlayer) != 0) { // if we could win on next board, factor this in
-				curScore -= BLOCK;
-			}
-
-			//s2.showBoard();
+			
 			if (curScore > maxScore) { // Update max
 				maxPos = act;
 				maxScore = curScore;
@@ -290,7 +294,7 @@ to play programs among many teams automatically).
 		System.gc(); // collect garbage
 		
 		bb = new BigBoard();
-		boolean AIvsHuman = true;
+		boolean AIvsHuman = false;
 		boolean AIvsAI = !AIvsHuman;
 		
 		Random r = new Random();
@@ -380,7 +384,7 @@ to play programs among many teams automatically).
 		System.err.println("That's the game. Thanks for playing!");
 		
 		System.exit(0); // Prevents the VM from holding onto all its memory
-		// Failing this, running my program consumes up to 100MB of memory every time
+		// Failing this, running my program consumes up to 500 MB of memory every time
 
 	}
 
