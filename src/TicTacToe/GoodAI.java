@@ -22,8 +22,8 @@ public class GoodAI {
 	public static int Minimax(Board state, int maxPlayer) {
 		
 		boolean root = false;
-		if (first) { 
-			root = true; 
+		if (first) {
+			root = true;
 			first = false;
 			if (state.getMovesMade() == 0 && maxPlayer == X) {
 				return 1;
@@ -115,66 +115,85 @@ public class GoodAI {
 	}
 	
 	public static Scanner sc = new Scanner(System.in); 
-	public static void main(String[] args) {
 	
-		Board b = new Board();
-		b.print = true;
+	
+	public static void main(String[] args) {
+		boolean oIsHuman = false;
 		
-		//b.showBoard();
-		
-		Random r = new Random();
-		
-		for (int turn = 0; turn <= 8; turn++) {
-			int[] actions = b.emptySquares();
-			curTurn = turn;
-			
-			int a = r.nextInt(actions.length);
-			
-			
-			int player = b.getCurrentPlayer();
-			int movePos = actions[a];
+		while(true){
+			Board b = new Board();
+			b.print = true;
 
-			
-			
-			first = true;
-
-			//b.showBoard();
-			if (player == O) {
-				movePos = Minimax(b, player);
+			b.showBoard();
+			System.err.println("Would you like to be X or O?");
+			String user = sc.next();
+			if (user.equalsIgnoreCase("x")) {
+				oIsHuman = false;
 			} else {
-				System.err.println("Enter a position (1-9)");
-				movePos = sc.nextInt();
+				oIsHuman = true;
 			}
-			System.err.println("Minimax eval...");
-			b.showBoard();
-			System.err.println("Minimax chose: " + movePos);
 
-			boolean moved = b.move(movePos);
-			if (!moved) { 
-				System.err.println("Error!  " +  movePos);
+			Random r = new Random();
+
+
+
+			for (int turn = 0; turn <= 8; turn++) {
+				int[] actions = b.emptySquares();
+				curTurn = turn;
+
+				int a = r.nextInt(actions.length);
+
+				int player = b.getCurrentPlayer();
+				int movePos = actions[a];
+
+				first = true;
+
+				//b.showBoard();
+				if (!oIsHuman) {
+					if (player == O) {
+						System.err.println("Minimax eval...");
+						movePos = Minimax(b, player);
+						System.err.println("Minimax chose: " + movePos);
+						System.out.println(movePos);
+					} else {
+						System.err.println("Enter a position (1-9)");
+						movePos = sc.nextInt();
+					}
+				} else {
+					if (player == X) {
+						System.err.println("Minimax eval...");
+						movePos = Minimax(b, player);
+						System.err.println("Minimax chose: " + movePos);
+						System.out.println(movePos);
+					} else {
+						System.err.println("Enter a position (1-9)");
+						movePos = sc.nextInt();
+					}
+				}
+
+				boolean moved = b.move(movePos);
+				if (!moved) { 
+					System.err.println("Error!  " +  movePos);
+				}
+				b.showBoard();
+
+				int winner = b.whoWon();
+				if (winner != 0) {
+					if (winner == X) { 	System.err.println("X Wins!\t Took: " + turn + " Moves.");
+					} else 				System.err.println("O Wins!\t Took: " + turn + " Moves.");
+
+					break;
+				}
+				if (turn == 9) {
+					System.err.println("It's a draw!");
+				}
+
 			}
+
 			b.showBoard();
-			
-			
-			
-			int winner = b.whoWon();
-			if (winner != 0) {
-				if (winner == X) { 	System.err.println("X Wins!\t Took: " + turn + " Moves.");
-				} else 				System.err.println("O Wins!\t Took: " + turn + " Moves.");
-				
-				break;
-			}
-			if (turn == 9) {
-				System.err.println("It's a draw!");
-			}
-			
-			// wait
-			//System.err.println("Waiting for a signal...");
-			//String go = sc.next();
+			System.err.println("That's the game. Thanks for playing!");
+			b.clearBoard();
 		}
-		
-		b.showBoard();
-		
 	}
 
 }
