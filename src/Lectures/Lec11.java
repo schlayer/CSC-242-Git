@@ -70,10 +70,41 @@ public class Lec11 {
 	
 	A Programming Language for Knowledge
 	
-	Object Symbols denote/indicate objects (like letters/numbers)
+	Constant Symbols denote/indicate objects (like letters/numbers)
 	Predicate Symbols denote relations [Mortal(.), Above(.,.)]
 	Function Symbols denote functions [mother(.), plus(.,.)]
 		Arity - number of arguments
+		
+	
+	Term 
+	* Logical Expression that denotes an object
+	* Constant symbol, or Function symbol and tuple of terms of correct arity
+	
+	
+	Atomic Sentence
+	* States a fact
+	* Predicate symbol and tuple of terms of correct arity
+	* Represents a FACT
+	
+	ex) On(a,b)  Brother(Seth, Michael)  Married(father(John), mother(Richard))
+	
+	Connectives - From propositional logic (all the logic operators)
+	
+	
+	First-Order Predicate Logic: a model satisfies a sentence if it makes the sentence true
+	Ontology:
+	* Objects
+	* Relations
+	* Functions
+	
+	Interpretation
+		Constant Symbols >> Objects (sigma) represent Omega_i
+		Predicate Symbols >> Relation (pi_n)
+		Function Symbols >> Function (phi_n)
+	
+	** Functions are typically One to One
+	
+	
 	
 	
 	
