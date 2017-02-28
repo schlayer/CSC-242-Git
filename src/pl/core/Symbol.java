@@ -2,6 +2,17 @@ package pl.core;
 
 public class Symbol implements Sentence {
 	
+	/*
+	Syntactic elements of first-order logic are the symbols that stand for objects,
+	relations, and functions. The symbols, therefore, come in three kinds: constant symbols,
+	which stand for objects; predicate symbols, which stand for relations; and function symbols, 
+	which stand for functions. We adopt the convention that these symbols will begin with
+	uppercase letters. For example, we might use the constant symbols Richard and John; the
+	predicate symbols Brother, OnHead, Person, King, and Crown; and the function symbol
+	LeftLeg. As with proposition symbols, the choice of names is entirely up to the user. Each
+	predicate and function symbol comes with an arity that fixes the number of arguments.
+	 */
+	
 	protected String name;
 
 	public Symbol(String name) {
