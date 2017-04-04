@@ -175,6 +175,7 @@ public class Board {
 		return blanks;
 	}
 	
+	@Override
 	public String toString() { // Create a string to represent the whole board
 		String str = "";
 		//str += "TicTacToe";
